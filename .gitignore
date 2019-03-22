@@ -1,0 +1,10 @@
+
+GreedyAlgorithm/Greedy/bin/Debug/
+
+GreedyAlgorithm/Greedy/obj/x86/Debug/
+
+*.exe
+
+GreedyAlgorithm/\.vs/GreedyAlgorithm/xs/UserPrefs\.xml
+
+*.pdb

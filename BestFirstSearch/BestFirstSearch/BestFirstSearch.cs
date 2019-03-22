@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Greedy
+namespace BestFirstSearch
 {
     class MainClass
     {
@@ -10,56 +10,68 @@ namespace Greedy
 
         class Node
         {
-            public int node_index = 0;
-            public char node_name;
-            public int CharToIndex = 0;
+            public int column_index = 0;
+            public char column_name;
             public double correlation = 0;
-            public Node parent_node = null;
+            public Node parent;
+
+            public Node(Node parent,char node_name, int node_index, double correlation)
+            {
+                this.column_name = node_name;
+                this.column_index = node_index;
+                this.correlation = correlation;
+                this.parent = parent;
+            }
 
             public Node(char node_name, int node_index, double correlation)
             {
-                this.node_name = node_name;
-                this.node_index = node_index;
-                this.CharToIndex = Math.Abs((int)node_name - 65);
+                this.column_name = node_name;
+                this.column_index = node_index;
                 this.correlation = correlation;
             }
 
-            public String toObject()
+            public String ToObject()
             {
-                return "{index:"+node_index+", inChar:"+node_name+ ", correlation:"+correlation+"}";
+                return "{index:" + column_index + ", ColumnName:" + column_name + ", correlation:" + correlation + "}";
             }
         }
 
         public static void Main(string[] args)
         {
             List<List<Object>> data = getTrainDataList();
-            //double[,] data = getTrainDataList
+
+            List<int> testRemove = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+            //testRemove.Remove(5);
+            //testRemove.ForEach((int num) => Console.Write(num+" "));
             GreedySearch(data);
         }
 
         private static List<List<Object>> getTrainDataList()
         {
             List<List<Object>> x = new List<List<object>>();
-            for (int i = 0; i < getTrainData().GetLength(0); i++)
+
+            int train_row = GetTrainData().GetLength(0);
+            int train_col = GetTrainData().GetLength(1);
+
+            for (int i = 0; i < train_row; i++)
             {
                 List<Object> jArray = new List<Object>();
-                for(int j = 0; j < getTrainData().GetLength(1); j++)
+                for (int j = 0; j < train_col; j++)
                 {
-                    jArray.Add(getTrainData()[i, j]);
+                    jArray.Add(GetTrainData()[i, j]);
                 }
                 x.Add(jArray);
             }
             return x;
         }
 
-        private static List<List<Object>> removeColumnTitle(List<List<Object>> data)
+        private static List<List<Object>> RemoveColumnTitle(List<List<Object>> data)
         {
             List<List<Object>> x = new List<List<object>>();
             CopyListTo(data, x);
             x.RemoveAt(0);
             return x;
         }
-
 
         private static void CopyListTo(List<List<object>> source, List<List<object>> target)
         {
@@ -74,9 +86,9 @@ namespace Greedy
             }
         }
 
-        private static Object[,] getTrainData()
+        private static Object[,] GetTrainData()
         {
-            Object[,] x = 
+            Object[,] x =
             {
                 {'A'  ,'B' ,'C' ,'D' ,'E' ,'F' ,'G','H','I','J' ,'K' ,'L','M','N' ,'O' ,'P' ,'Q' ,'R','S','T','U','V','W','X'},
                 {0.27,3.72,1.01,5.65,3.29,4.68,1,0.9,1,1.24,0.91,1,1,0.87,0.85,0.88,0.81,1,1,1,1,0.8,1,208},
@@ -113,7 +125,7 @@ namespace Greedy
             return x;
         }
 
-        private static double[] getColumn(List<List<Object>> data, int column)
+        private static double[] GetColumn(List<List<Object>> data, int column)
         {
             int row = data.Count;
             double[] x = new double[row];
@@ -126,7 +138,7 @@ namespace Greedy
         }
 
 
-        private static double[] getColumn(double[,] data, int column)
+        private static double[] GetColumn(double[,] data, int column)
         {
             int row = data.GetLength(0);
             double[] x = new double[row];
@@ -138,94 +150,86 @@ namespace Greedy
             return x;
         }
 
-        private static void CreateChild(List<List<Object>>  data,List<List<Object>> compileData, List<Node> child_state, List<Node> best_node)
+        private static void CreateChild(List<List<Object>> Data, List<Node> Target, List<Node> best_node)
         {
-            List<int> indexArray = new List<int>();
-            int column_length = compileData.ElementAt(0).Count -1;
+            List<int> arrayIndex = new List<int>();
+            List<int> remainIndex = new List<int>();
 
-            for(int i=0;i<best_node.Count; i++) {
-                indexArray.Add(best_node.ElementAt(i).CharToIndex);
+            int column_length = Data.ElementAt(0).Count - 1;
+            for (int i = 0; i < column_length; i++)
+            {
+                remainIndex.Add(i);
             }
 
-            //Factor Factor
+            //add best_node set to arrayIndex
+            for (int i = 0; i < best_node.Count; i++)
+            {
+                arrayIndex.Add(best_node.ElementAt(i).column_index);
+                remainIndex.Remove(best_node.ElementAt(i).column_index);
+            }
+
             double[,] r_FactorFactor;
-            double compute_Factor_Factor = 0.0f;
-            for (int i=0;i<compileData.ElementAt(0).Count; i++)
-            {
-                indexArray.Add(i);
-                r_FactorFactor = getMultiColumn(compileData, indexArray.ToArray());
-                compute_Factor_Factor += ComputeFactorFactor(r_FactorFactor);
-                indexArray.RemoveAt(indexArray.Count - 1);
-            }
+            double compute_factor_factor = 0.0f;
 
-            //Factor Effort
             double[,] r_FactorEffort;
-            double compute_Factor_Effort = 0.0f;
-            for(int i=0;i<compileData.ElementAt(0).Count; i++)
+            double compute_factor_effort = 0.0f;
+
+            for (int i = 0; i < remainIndex.Count; i++)
             {
-                indexArray.Add(i);
-                r_FactorEffort = getMultiColumn(compileData, indexArray.ToArray());
-                compute_Factor_Effort += ComputeFactorEffort(r_FactorEffort, getColumn(compileData, column_length));
+                int remain_index = remainIndex.ElementAt(i);
+                arrayIndex.Add(remain_index);
+                arrayIndex.Add(column_length);
+
+                r_FactorFactor = GetMultiColumn(Data, arrayIndex.ToArray());
+                compute_factor_factor = ComputeFactorFactor(r_FactorFactor);
+
+                r_FactorEffort = GetMultiColumn(Data, arrayIndex.ToArray());
+                compute_factor_effort = ComputeFactorEffort(r_FactorEffort);
+
+                double correlation = ComputeCorrelationSum(arrayIndex.Count - 1, compute_factor_effort, compute_factor_factor);
+
+                Node node = new Node((char)(remainIndex.ElementAt(i) + 65), remainIndex.ElementAt(i), correlation);
+                Target.Add(node);
+                arrayIndex.Remove(remain_index);
+                arrayIndex.Remove(column_length);
             }
-
-            double current_correlation = ComputeCorrelationSum(compileData.ElementAt(0).Count, compute_Factor_Effort, compute_Factor_Factor);
-            int last_index_Array = indexArray.Count - 1;
-            Node correlationNode = new Node(
-                Char.Parse(data.ElementAt(0).ElementAt(indexArray.ElementAt(last_index_Array)).ToString()),
-                indexArray.Count-1, 
-                current_correlation
-                );
-            child_state.Add(correlationNode);
-
-            /* for (int i = 0; i < defaultData.ElementAt(0).Count - 1; i++)
-             {
-                 //Factor Factor
-                 double[,] r_FactorFactor;
-                 double compute_Factor_Factor = 0.0f;
-                 for (int j = i+1; j < defaultData.ElementAt(i).Count - 1; j++)
-                 {
-                     r_FactorFactor = mapArrays(getColumn(compileData, i), getColumn(compileData, j));
-                     compute_Factor_Factor += ComputeFactorFactor(r_FactorFactor);
-                 }
-
-                 //Factor EFFORT
-                 double[,] r_FactorEffort;
-                 double compute_Factor_Effort = 0.0f;
-                 for (int j =i+1; j< defaultData.ElementAt(i).Count-1; j++)
-                 {
-                     r_FactorEffort = mapArrays(getColumn(compileData, i), getColumn(compileData, j));
-                     compute_Factor_Effort += ComputeFactorEffort(r_FactorEffort, getColumn(compileData, compileData.ElementAt(0).Count - 1));
-                 }
-
-                 double current_correlation = ComputeCorrelationSum(compileData.ElementAt(0).Count, compute_Factor_Effort, compute_Factor_Factor);
-                 Node correlationNode = new Node(Char.Parse(data.ElementAt(0).ElementAt(i).ToString()), i, current_correlation);
-                 child_state.Add(correlationNode);
-             }*/
         }
 
-        private static bool deleteColumn(List<List<Object>> data, int column)
+        private static List<Node> CreateBFSChild(List<List<Object>> data, List<Node> Target, List<Node> parent_node)
         {
-            int row = data.Count;
-            List<List<Object>> newData = new List<List<Object>>();
-            for (int i=0;i<row; i++)
+            List<int> arrayIndex = new List<int>();
+            List<int> remainIndex = new List<int>();
+
+
+            for(int i = 0; i < data.ElementAt(0).Count; i++)
             {
-                if(data.ElementAt(0).Count != 0)
-                {
-                    data.ElementAt(i).RemoveAt(column);
-                }
-                else
-                {
-                    return false;
-                }
+                remainIndex.Add(i);
             }
 
-            return true;
+            for (int i = 0; i < parent_node.Count; i++)
+            {
+                remainIndex.Remove(parent_node.ElementAt(i).column_index);
+            }
+
+
+
+            return null;
+        }
+
+        private static List<Node> BestFirstSearch(List<List<Object>> data)
+        {
+            List<Node> best_node = new List<Node>();
+            List<Node> 
+
+
+            return null;
         }
 
         private static List<Node> GreedySearch(List<List<Object>> data)
         {
             List<Node> best_node = new List<Node>();
-            List<List<Object>> compileData = new List<List<Object>>();
+            List<List<Object>> unTitleData = new List<List<Object>>();
+            unTitleData = RemoveColumnTitle(data);
 
             double initial_state = 0;
             double goal_state = 1;
@@ -241,69 +245,75 @@ namespace Greedy
                 int layer = 0;
                 while (!goal_state.Equals(current_state))
                 {
-                    Console.WriteLine("\nLayer:" + layer++);
+                    //initial 
+                    List<Node> child_node = new List<Node>();
 
-                    //best_index is index of column                    
-                    List<Node> child_state = new List<Node>();
+                    //แสดงรอบของ Layer
+                    Console.WriteLine("\nLayer : " + layer++);
 
-                    //createChild 
-                    CreateChild(data, removeColumnTitle(data), child_state, best_node);
+                    // Create Child Node then keep child node to child_node and Show the Child
+                    CreateChild(unTitleData, child_node, best_node);
 
-                    //show client node
-                    foreach (Node node in child_state)
+                    // Show The Child_node
+                    child_node.ForEach((Node node) => Console.WriteLine(node.ToObject()));
+
+                    // get The best Correlation, *height is the best
+                    Node best_correlation = GetHeight(child_node, best_node);
+                    if (best_correlation != null)
                     {
-                        Console.WriteLine(node.toObject());
-                    }
-
-                    //find best Correlation
-                    Node CurrentCorrelation = new Node('A',0,0.0f);
-                    for(int i = 0; i < child_state.Count; i++)
-                    {
-                        if((child_state.ElementAt(i).correlation > CurrentCorrelation.correlation))
-                        {
-                            CurrentCorrelation = child_state[i];
-                        }else if (i.Equals(0))
-                        {
-                            CurrentCorrelation = child_state[i];
-                        }
-                    }
-                    Console.WriteLine("Best Factor in This Node : " + CurrentCorrelation.toObject());
-                    //ถ้า function deleteColumn เป็น false แสดงว่าทำจนหมดทั้ง column
-                    if (!deleteColumn(data, CurrentCorrelation.node_index))
-                    {
-                        current_state = 1.0f;
+                        best_node.Add(best_correlation);
                     }
                     else
                     {
-                        //if has the data in best_node Any(); return true
-                        if (best_node.Any())
-                        {
-                            Console.WriteLine(best_node.ElementAt(Math.Abs(best_node.Count - 1)).correlation < CurrentCorrelation.correlation);
-                            if (best_node.ElementAt(Math.Abs(best_node.Count - 1)).correlation < CurrentCorrelation.correlation)
-                            {
-                                best_node.Add(CurrentCorrelation);
-                                Console.WriteLine("Best Node: " + CurrentCorrelation.toObject());                               
-                            }
-                        }
-                        else
-                        {
-                            best_node.Add(CurrentCorrelation);
-                            Console.WriteLine("Best Node: "+ CurrentCorrelation.toObject());
-                        }
+                        current_state = 1;
                     }
+
                 }
 
-                Console.WriteLine("RESULT FACTOR : ");
+                Console.WriteLine("All Best Node : ");
                 foreach (Node node in best_node)
                 {
-                    Console.WriteLine(node.toObject());
+                    Console.WriteLine(node.ToObject());
                 }
             }
 
             return best_node;
         }
 
-        private static double[,] getMultiColumn(double[,] data, int[] index)
+        private static Node GetHeight(List<Node> child_node, List<Node> best_node)
+        {
+            //get heightes node
+            Node CurrentCorrelation = new Node('A', 0, 0.0f);
+            for (int i = 0; i < child_node.Count; i++)
+            {
+                if ((child_node.ElementAt(i).correlation > CurrentCorrelation.correlation))
+                {
+                    CurrentCorrelation = child_node[i];
+                }
+                else if (i.Equals(0))
+                {
+                    Console.Write(i);
+                    CurrentCorrelation = child_node[i];
+                }
+            }
+            Console.WriteLine("Best Node in this layer: " + CurrentCorrelation.ToObject());
+
+            if (best_node.Any())
+            {
+                if (best_node.ElementAt(Math.Abs(best_node.Count - 1)).correlation < CurrentCorrelation.correlation)
+                {
+                    return CurrentCorrelation;
+                }
+            }
+            else
+            {
+                return CurrentCorrelation;
+            }
+
+            return null;
+        }
+
+        private static double[,] GetMultiColumn(double[,] data, int[] index)
         {
             int rowLen = data.GetLength(0);
             int colLen = index.Length;
@@ -318,7 +328,7 @@ namespace Greedy
             return combineData; //return ค่าเป็นข้อมูลหลาย Columns
         }
 
-        private static double[,] getMultiColumn(List<List<Object>> data, int[] index)
+        private static double[,] GetMultiColumn(List<List<Object>> data, int[] index)
         {
             int rowLen = data.Count;
             int colLen = index.Length;
@@ -327,7 +337,7 @@ namespace Greedy
             {
                 for (int j = 0; j < colLen; j++)
                 {
-                    combineData[i, j] = Double.Parse(data.ElementAt(i).ElementAt(index[j]-1).ToString());
+                    combineData[i, j] = Double.Parse(data.ElementAt(i).ElementAt(index[j]).ToString());
                 }
             }
             return combineData; //return ค่าเป็นข้อมูลหลาย Columns
@@ -341,27 +351,22 @@ namespace Greedy
             Array.Sort(ay);
             return Enumerable.SequenceEqual(ax, ay);
         }
-         
+
         private static double ComputeCorrelationSum(int m, double Factor_Effort, double Factor_Factor)
         {
-            if (Factor_Factor.Equals(-1))
-            {
-                return Factor_Effort;
-            }
-
-            double r_correlation = (m * Factor_Effort) / (Math.Sqrt(m + (m * (m - 1) * Factor_Factor)));
-            return Double.IsNaN(r_correlation)||Double.IsInfinity(r_correlation)?0:r_correlation;
+            return (m * Factor_Effort) / Math.Sqrt(m + (m * (m - 1) * Factor_Factor));
         }
 
         //สำหรับคำนวณ ค่าความสัมพันธ์ระหว่างปัจจัยในชุด s ทั้งหมด กับ Effort
-        private static double ComputeFactorEffort(double[,] x, double[] Effort)
+        private static double ComputeFactorEffort(double[,] x)
         {
             double r_sum = 0;
-            int x_length = x.GetLength(1);
+            int x_length = x.GetLength(1) - 1;
             double[] Factor;
+            double[] Effort = GetColumn(x, x_length);
             for (int i = 0; i < x_length; i++)
             {
-                Factor = getColumn(x, i);
+                Factor = GetColumn(x, i);
                 //double r = Math.Abs(Correlation(Factor, Effort));
                 double r = Correlation(Factor, Effort);
                 if (Double.IsNaN(r) || Double.IsInfinity(r)) r = 0;
@@ -370,21 +375,19 @@ namespace Greedy
             return r_sum / x_length;
         }
 
-
-
         private static double ComputeFactorFactor(double[,] x)
         {
             double r_sum = 0;
             int count = 0;
-            int x_length = x.GetLength(1);
+            int x_length = x.GetLength(1) - 1;
 
-            //if (x_length == 1) return 1; // ถ้ามี 1 ปัจจัยให้ return 1 โดยที่ 1 มาจากความสัมพันธ์ระหว่างตัวมันเอง
+            if (x_length == 1) return 1; // ถ้ามี 1 ปัจจัยให้ return 1 โดยที่ 1 มาจากความสัมพันธ์ระหว่างตัวมันเอง
             for (int i = 0; i < x_length - 1; i++)
             {
                 for (int j = 1; j < x_length; j++)
                 {
                     //double r = Math.Abs(Correlation(getColumn(x, i), getColumn(x, j)));
-                    double r = Correlation(getColumn(x, i), getColumn(x, j));
+                    double r = Correlation(GetColumn(x, i), GetColumn(x, j));
                     if (Double.IsNaN(r) || Double.IsInfinity(r)) r = 0;
                     r_sum = r_sum + r;
                     count++;

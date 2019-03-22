@@ -1,2 +1,6 @@
 /home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.csprojAssemblyReference.cache
 /home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.csproj.CoreCompileInputs.cache
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/bin/Debug/BestFirstSearch.exe
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/bin/Debug/BestFirstSearch.pdb
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.exe
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.pdb

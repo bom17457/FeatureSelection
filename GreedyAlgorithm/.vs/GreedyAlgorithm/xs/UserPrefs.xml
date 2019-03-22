@@ -1,9 +1,5 @@
 ﻿<Properties StartupConfiguration="{7D3137DA-64E9-472E-88D9-0B878EA554EF}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Greedy/Greedy.cs">
-    <Files>
-      <File FileName="Greedy/Greedy.cs" Line="78" Column="10" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workbench />
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="../../../Greedy/Program.cs" line="331" offsetX="504" offsetY="5940" expression="x_length" liveUpdate="False" />
     <Watch file="../../../Greedy/Program.cs" line="172" offsetX="1232" offsetY="3078" expression="r_FactorEffort" liveUpdate="False" />
