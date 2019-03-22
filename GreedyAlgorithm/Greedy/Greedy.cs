@@ -30,10 +30,6 @@ namespace Greedy
         public static void Main(string[] args)
         {
             List<List<Object>> data = getTrainDataList();
-
-            List<int> testRemove = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-            //testRemove.Remove(5);
-            //testRemove.ForEach((int num) => Console.Write(num+" "));
             GreedySearch(data);
         }
 
@@ -56,32 +52,10 @@ namespace Greedy
             return x;
         }
 
-        private static List<List<Object>> RemoveColumnTitle(List<List<Object>> data)
+        private static Double[,] GetTrainData()
         {
-            List<List<Object>> x = new List<List<object>>();
-            CopyListTo(data, x);
-            x.RemoveAt(0);
-            return x;
-        }
-
-        private static void CopyListTo(List<List<object>> source, List<List<object>> target)
-        {
-            for (int i = 0; i < source.Count; i++)
+            Double[,] x =
             {
-                List<Object> jArray = new List<Object>();
-                for (int j = 0; j < source.ElementAt(i).Count; j++)
-                {
-                    jArray.Add(source.ElementAt(i).ElementAt(j));
-                }
-                target.Add(jArray);
-            }
-        }
-
-        private static Object[,] GetTrainData()
-        {
-            Object[,] x =
-            {
-                {'A'  ,'B' ,'C' ,'D' ,'E' ,'F' ,'G','H','I','J' ,'K' ,'L','M','N' ,'O' ,'P' ,'Q' ,'R','S','T','U','V','W','X'},
                 {0.27,3.72,1.01,5.65,3.29,4.68,1,0.9,1,1.24,0.91,1,1,0.87,0.85,0.88,0.81,1,1,1,1,0.8,1,208},
                 { 1.02,4.96,1.01,5.65,2.19,4.68,1.0,0.9,1.0,1.24,0.91,1.0,1.0,0.87,0.85,0.88,0.81,1.1,1.0,1.0,1.0,0.8,1.0,195 },
                 { 2.52,3.72,1.01,5.65,3.29,4.68,1,0.9,1,1.24,0.91,1,1,0.87,0.85,0.88,0.81,1,1,1,1,0.8,1,162 },
@@ -112,7 +86,7 @@ namespace Greedy
                 {67.32,1.24,1.01,5.65,0,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,0.81,0.85,0.84,1,0.8,1,234},
                 {79.82,4.96,1.01,5.65,1.1,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,1,0.91,0.91,1,0.8,1,636},
                 {112.28,4.96,1.01,5.65,1.1,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,1.1,0.91,0.91,1,0.8,1,1278},
-    };
+            };
             return x;
         }
 
@@ -123,11 +97,9 @@ namespace Greedy
             for (int i = 0; i < row; i++)
             {
                 x[i] = Double.Parse((data.ElementAt(i).ElementAt(column).ToString()));
-
             }
             return x;
         }
-
 
         private static double[] GetColumn(double[,] data, int column)
         {
@@ -189,8 +161,6 @@ namespace Greedy
         private static List<Node> GreedySearch(List<List<Object>> data)
         {           
             List<Node> best_node = new List<Node>();
-            List<List<Object>> unTitleData = new List<List<Object>>();
-            unTitleData = RemoveColumnTitle(data);
 
             double initial_state = 0;
             double goal_state = 1;
@@ -213,7 +183,7 @@ namespace Greedy
                     Console.WriteLine("\nLayer : " + layer++);
 
                     // Create Child Node then keep child node to child_node and Show the Child
-                    CreateChild(unTitleData, child_node, best_node);
+                    CreateChild(data, child_node, best_node);
 
                     // Show The Child_node
                     child_node.ForEach((Node node) => Console.WriteLine(node.ToObject()));
@@ -397,6 +367,5 @@ namespace Greedy
             // correlation is just a normalized covariation
             return cov / sigmaX / sigmaY;
         }
-
     }
 }
