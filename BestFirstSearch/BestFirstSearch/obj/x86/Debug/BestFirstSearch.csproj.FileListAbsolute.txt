@@ -1,0 +1,2 @@
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.csprojAssemblyReference.cache
+/home/akaporn/Projects/BestFirstSearch/BestFirstSearch/obj/x86/Debug/BestFirstSearch.csproj.CoreCompileInputs.cache

@@ -1,0 +1,20 @@
+﻿<Properties StartupConfiguration="{7D3137DA-64E9-472E-88D9-0B878EA554EF}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Greedy/Greedy.cs">
+    <Files>
+      <File FileName="Greedy/Greedy.cs" Line="78" Column="10" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
+    <Watch file="../../../Greedy/Program.cs" line="331" offsetX="504" offsetY="5940" expression="x_length" liveUpdate="False" />
+    <Watch file="../../../Greedy/Program.cs" line="172" offsetX="1232" offsetY="3078" expression="r_FactorEffort" liveUpdate="False" />
+    <Watch file="../../../Greedy/Program.cs" line="172" offsetX="1232" offsetY="3078" expression="r_FactorEffort" liveUpdate="False" />
+    <Watch file="../../../Greedy/Greedy.cs" line="188" offsetX="720" offsetY="3366" expression="compute_factor_factor" liveUpdate="False" />
+    <Watch file="../../../Greedy/Greedy.cs" line="145" offsetX="608" offsetY="2592" expression="unTitleData.ElementAt(0).Count" liveUpdate="False" />
+  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Greedy PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>
