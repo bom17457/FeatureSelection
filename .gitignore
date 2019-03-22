@@ -8,3 +8,7 @@ GreedyAlgorithm/Greedy/obj/x86/Debug/
 GreedyAlgorithm/\.vs/GreedyAlgorithm/xs/UserPrefs\.xml
 
 *.pdb
+
+BestFirstSearch/\.vs/BestFirstSearch/xs/UserPrefs\.xml
+
+GreedyAlgorithm/Greedy/Greedy\.csproj
