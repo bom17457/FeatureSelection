@@ -1,4 +1,12 @@
-﻿using System;
+﻿/*
+ * FeatureSelection
+ * Rajamangala of Technology Tawan-OK : Chakrabonges Bhuvanarth Campus
+ * Akaporn Katip and Suriyakarn Sukkipan
+ * นายอรรฆพร กาติ๊บ และ นายสุริยกานต์ สุขขีพันธ์
+ * Subject A.I.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
