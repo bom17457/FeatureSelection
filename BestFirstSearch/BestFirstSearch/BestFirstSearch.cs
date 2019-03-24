@@ -41,9 +41,6 @@ namespace BestFirstSearch
                         round++;
                     }
                     return "{index:" + column_index + ", parentNode:{"+str+"},ColumnName:" + column_name + ", correlation:" + correlation + "}";
-                //}
-
-                //return "{index:" + column_index + ", ColumnName:" + column_name + ", correlation:" + correlation + "}";
             }
 
             public void hasGenerate()
@@ -152,7 +149,7 @@ namespace BestFirstSearch
             {
                 for (int i = parent_node.column_index + 1; i < col_len; i++) remainIndex.Add(i);
                 Node prototype_parent_node = parent_node;
-                while (prototype_parent_node != null)
+                while (prototype_parent_node.parent_node != null)
                 {
                     arrayIndex.Add(prototype_parent_node.column_index);
                     remainIndex.Remove(prototype_parent_node.column_index);
