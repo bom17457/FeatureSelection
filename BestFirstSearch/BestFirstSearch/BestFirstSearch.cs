@@ -6,44 +6,59 @@ namespace BestFirstSearch
 {
     class MainClass
     {
-
-
         class Node
         {
             public int column_index = 0;
-            public char column_name;
+            public char column_name = '#';
             public double correlation = 0;
-            public Node parent;
+            public Node parent_node;
+            public bool isGenerate = false;
 
-            public Node(Node parent,char node_name, int node_index, double correlation)
+            public Node(Node parent_node,char node_name, int node_index, double correlation)
             {
                 this.column_name = node_name;
                 this.column_index = node_index;
                 this.correlation = correlation;
-                this.parent = parent;
+                this.parent_node = parent_node;
             }
 
-            public Node(char node_name, int node_index, double correlation)
+            public Node(Node parent_node)
             {
-                this.column_name = node_name;
-                this.column_index = node_index;
-                this.correlation = correlation;
+                this.parent_node = parent_node;
             }
 
             public String ToObject()
             {
-                return "{index:" + column_index + ", ColumnName:" + column_name + ", correlation:" + correlation + "}";
+                //if(parent_node.parent_node != null)
+                //{
+                    String str = "";
+                    Node prototype_parent_node = this.parent_node;
+                    int round = 0;
+                    while (prototype_parent_node!=null)
+                    {
+                        str += ((round>0)?"->":"")+prototype_parent_node.column_name;
+                        prototype_parent_node = prototype_parent_node.parent_node;
+                        round++;
+                    }
+                    return "{index:" + column_index + ", parentNode:{"+str+"},ColumnName:" + column_name + ", correlation:" + correlation + "}";
+                //}
+
+                //return "{index:" + column_index + ", ColumnName:" + column_name + ", correlation:" + correlation + "}";
+            }
+
+            public void hasGenerate()
+            {
+                this.isGenerate = true;
             }
         }
 
         public static void Main(string[] args)
         {
-            List<List<Object>> data = getTrainDataList();
 
-            List<int> testRemove = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-            //testRemove.Remove(5);
-            //testRemove.ForEach((int num) => Console.Write(num+" "));
-            GreedySearch(data);
+            List<List<Object>> data = getTrainDataList();
+            int[] index = { 0, 1, 2, 3, 4, 5, 23 };
+            data = GetMultiColumn(data, index, "");
+            BestFirstSearch(data);
         }
 
         private static List<List<Object>> getTrainDataList()
@@ -65,32 +80,10 @@ namespace BestFirstSearch
             return x;
         }
 
-        private static List<List<Object>> RemoveColumnTitle(List<List<Object>> data)
+        private static Double[,] GetTrainData()
         {
-            List<List<Object>> x = new List<List<object>>();
-            CopyListTo(data, x);
-            x.RemoveAt(0);
-            return x;
-        }
-
-        private static void CopyListTo(List<List<object>> source, List<List<object>> target)
-        {
-            for (int i = 0; i < source.Count; i++)
+            Double[,] x =
             {
-                List<Object> jArray = new List<Object>();
-                for (int j = 0; j < source.ElementAt(i).Count; j++)
-                {
-                    jArray.Add(source.ElementAt(i).ElementAt(j));
-                }
-                target.Add(jArray);
-            }
-        }
-
-        private static Object[,] GetTrainData()
-        {
-            Object[,] x =
-            {
-                {'A'  ,'B' ,'C' ,'D' ,'E' ,'F' ,'G','H','I','J' ,'K' ,'L','M','N' ,'O' ,'P' ,'Q' ,'R','S','T','U','V','W','X'},
                 {0.27,3.72,1.01,5.65,3.29,4.68,1,0.9,1,1.24,0.91,1,1,0.87,0.85,0.88,0.81,1,1,1,1,0.8,1,208},
                 { 1.02,4.96,1.01,5.65,2.19,4.68,1.0,0.9,1.0,1.24,0.91,1.0,1.0,0.87,0.85,0.88,0.81,1.1,1.0,1.0,1.0,0.8,1.0,195 },
                 { 2.52,3.72,1.01,5.65,3.29,4.68,1,0.9,1,1.24,0.91,1,1,0.87,0.85,0.88,0.81,1,1,1,1,0.8,1,162 },
@@ -121,7 +114,7 @@ namespace BestFirstSearch
                 {67.32,1.24,1.01,5.65,0,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,0.81,0.85,0.84,1,0.8,1,234},
                 {79.82,4.96,1.01,5.65,1.1,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,1,0.91,0.91,1,0.8,1,636},
                 {112.28,4.96,1.01,5.65,1.1,4.68,1,0.9,1,1,0.91,1,1,0.87,0.85,0.88,0.81,1.1,0.91,0.91,1,0.8,1,1278},
-    };
+            };
             return x;
         }
 
@@ -132,11 +125,9 @@ namespace BestFirstSearch
             for (int i = 0; i < row; i++)
             {
                 x[i] = Double.Parse((data.ElementAt(i).ElementAt(column).ToString()));
-
             }
             return x;
         }
-
 
         private static double[] GetColumn(double[,] data, int column)
         {
@@ -150,22 +141,27 @@ namespace BestFirstSearch
             return x;
         }
 
-        private static void CreateChild(List<List<Object>> Data, List<Node> Target, List<Node> best_node)
+        private static void CreateChildBFS(List<List<Object>> Data, List<Node> Target, Node parent_node, List<Node> parent_list)
         {
             List<int> arrayIndex = new List<int>();
             List<int> remainIndex = new List<int>();
 
-            int column_length = Data.ElementAt(0).Count - 1;
-            for (int i = 0; i < column_length; i++)
-            {
-                remainIndex.Add(i);
-            }
+            int col_len = Data.ElementAt(0).Count - 1;
 
-            //add best_node set to arrayIndex
-            for (int i = 0; i < best_node.Count; i++)
+            if (parent_node.parent_node != null)
             {
-                arrayIndex.Add(best_node.ElementAt(i).column_index);
-                remainIndex.Remove(best_node.ElementAt(i).column_index);
+                for (int i = parent_node.column_index + 1; i < col_len; i++) remainIndex.Add(i);
+                Node prototype_parent_node = parent_node;
+                while (prototype_parent_node != null)
+                {
+                    arrayIndex.Add(prototype_parent_node.column_index);
+                    remainIndex.Remove(prototype_parent_node.column_index);
+                    prototype_parent_node = prototype_parent_node.parent_node;
+                }
+            }
+            else
+            {
+                for (int i = parent_node.column_index; i < col_len; i++) remainIndex.Add(i);
             }
 
             double[,] r_FactorFactor;
@@ -174,11 +170,11 @@ namespace BestFirstSearch
             double[,] r_FactorEffort;
             double compute_factor_effort = 0.0f;
 
-            for (int i = 0; i < remainIndex.Count; i++)
+            for (int i=0; i<remainIndex.Count; i++)
             {
-                int remain_index = remainIndex.ElementAt(i);
-                arrayIndex.Add(remain_index);
-                arrayIndex.Add(column_length);
+                int column_index = remainIndex.ElementAt(i);
+                arrayIndex.Add(column_index);
+                arrayIndex.Add(col_len); //col_len is effort column
 
                 r_FactorFactor = GetMultiColumn(Data, arrayIndex.ToArray());
                 compute_factor_factor = ComputeFactorFactor(r_FactorFactor);
@@ -188,129 +184,79 @@ namespace BestFirstSearch
 
                 double correlation = ComputeCorrelationSum(arrayIndex.Count - 1, compute_factor_effort, compute_factor_factor);
 
-                Node node = new Node((char)(remainIndex.ElementAt(i) + 65), remainIndex.ElementAt(i), correlation);
-                Target.Add(node);
-                arrayIndex.Remove(remain_index);
-                arrayIndex.Remove(column_length);
+                Node child = new Node(parent_node, (char)(remainIndex.ElementAt(i) + 65), remainIndex.ElementAt(i), correlation);
+                Target.Add(child);
+
+                arrayIndex.Remove(column_index);
+                arrayIndex.Remove(col_len);
             }
-        }
-
-        private static List<Node> CreateBFSChild(List<List<Object>> data, List<Node> Target, List<Node> parent_node)
-        {
-            List<int> arrayIndex = new List<int>();
-            List<int> remainIndex = new List<int>();
-
-
-            for(int i = 0; i < data.ElementAt(0).Count; i++)
-            {
-                remainIndex.Add(i);
-            }
-
-            for (int i = 0; i < parent_node.Count; i++)
-            {
-                remainIndex.Remove(parent_node.ElementAt(i).column_index);
-            }
-
-
-
-            return null;
         }
 
         private static List<Node> BestFirstSearch(List<List<Object>> data)
         {
-            List<Node> best_node = new List<Node>();
-            List<Node> 
-
-
-            return null;
-        }
-
-        private static List<Node> GreedySearch(List<List<Object>> data)
-        {
-            List<Node> best_node = new List<Node>();
-            List<List<Object>> unTitleData = new List<List<Object>>();
-            unTitleData = RemoveColumnTitle(data);
+            List<Node> child_node = new List<Node>();
+            List<Node> parent_node = new List<Node>();
 
             double initial_state = 0;
             double goal_state = 1;
             double current_state = 0;
+            int column_length = data.ElementAt(0).Count;
+            int layer = 0;
 
-            if (initial_state.Equals(goal_state))
+            parent_node.Add(new Node(null));
+
+            while (!goal_state.Equals(initial_state))
             {
-                return best_node;
-            }
-            else
-            {
-                current_state = initial_state;
-                int layer = 0;
-                while (!goal_state.Equals(current_state))
+                Console.WriteLine("Layer : "+layer++);
+                if (current_state.Equals(goal_state))
                 {
-                    //initial 
-                    List<Node> child_node = new List<Node>();
-
-                    //แสดงรอบของ Layer
-                    Console.WriteLine("\nLayer : " + layer++);
-
-                    // Create Child Node then keep child node to child_node and Show the Child
-                    CreateChild(unTitleData, child_node, best_node);
-
-                    // Show The Child_node
-                    child_node.ForEach((Node node) => Console.WriteLine(node.ToObject()));
-
-                    // get The best Correlation, *height is the best
-                    Node best_correlation = GetHeight(child_node, best_node);
-                    if (best_correlation != null)
-                    {
-                        best_node.Add(best_correlation);
-                    }
-                    else
-                    {
-                        current_state = 1;
-                    }
-
+                    return parent_node;
                 }
-
-                Console.WriteLine("All Best Node : ");
-                foreach (Node node in best_node)
+                else
                 {
-                    Console.WriteLine(node.ToObject());
+                    child_node = new List<Node>();
+                    foreach (Node p_node in parent_node)
+                    {
+                        if (!p_node.isGenerate) {
+                            CreateChildBFS(data, child_node, p_node, parent_node);
+                            p_node.hasGenerate();
+                        }
+                    }
+
+                    foreach (Node c_node in child_node)
+                    {
+                        Console.WriteLine(c_node.ToObject());
+                        parent_node.Add(c_node);
+                    }
+
+                    if(child_node.Count == 1)
+                    {
+                        initial_state = 1;
+                    }
                 }
             }
 
-            return best_node;
+            GetHeight(parent_node);
+
+            return child_node;
         }
 
-        private static Node GetHeight(List<Node> child_node, List<Node> best_node)
+        private static void GetHeight(List<Node> parent)
         {
             //get heightes node
-            Node CurrentCorrelation = new Node('A', 0, 0.0f);
-            for (int i = 0; i < child_node.Count; i++)
+            Node CurrentCorrelation = new Node(null,'A', 0, 0.0f);
+            for (int i = 0; i < parent.Count; i++)
             {
-                if ((child_node.ElementAt(i).correlation > CurrentCorrelation.correlation))
+                if ((parent.ElementAt(i).correlation > CurrentCorrelation.correlation))
                 {
-                    CurrentCorrelation = child_node[i];
+                    CurrentCorrelation = parent[i];
                 }
                 else if (i.Equals(0))
                 {
-                    Console.Write(i);
-                    CurrentCorrelation = child_node[i];
+                    CurrentCorrelation = parent[i];
                 }
             }
-            Console.WriteLine("Best Node in this layer: " + CurrentCorrelation.ToObject());
-
-            if (best_node.Any())
-            {
-                if (best_node.ElementAt(Math.Abs(best_node.Count - 1)).correlation < CurrentCorrelation.correlation)
-                {
-                    return CurrentCorrelation;
-                }
-            }
-            else
-            {
-                return CurrentCorrelation;
-            }
-
-            return null;
+            Console.WriteLine("\nThe best factor is: " + CurrentCorrelation.ToObject());
         }
 
         private static double[,] GetMultiColumn(double[,] data, int[] index)
@@ -341,6 +287,23 @@ namespace BestFirstSearch
                 }
             }
             return combineData; //return ค่าเป็นข้อมูลหลาย Columns
+        }
+
+        private static List<List<Object>> GetMultiColumn(List<List<Object>> data, int[] index, String func)
+        {
+            int rowLen = data.Count;
+            int colLen = index.Length;
+            List<List<Object>> combineList = new List<List<object>>();
+            for (int i = 0; i < rowLen; i++)
+            {
+                List<Object> dataList = new List<object>();
+                for (int j = 0; j < colLen; j++)
+                {
+                    dataList.Add(Double.Parse(data.ElementAt(i).ElementAt(index[j]).ToString()));
+                }
+                combineList.Add(dataList);
+            }
+            return combineList; //return ค่าเป็นข้อมูลหลาย Columns
         }
 
         private static bool IsDuplicate(double[] x, double[] y)
@@ -436,6 +399,5 @@ namespace BestFirstSearch
             // correlation is just a normalized covariation
             return cov / sigmaX / sigmaY;
         }
-
     }
 }
